@@ -1,0 +1,13 @@
+{
+  "name": "point-of-sale",
+  "version": "1.0.0",
+  "description": "A simple point of sale application designed to meet the specifications of Pillar's \"Checkout Order Total Kata\"",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon app",
+    "test": "mocha",
+    "docs": "apidoc -i ../populus-app/ -o docs/"
+  },
+  "author": "Louis Hamilton",
+  "license": "ISC"
+}
