@@ -5,6 +5,8 @@ var router = express.Router();
 var Cart = require('../models/cart');
 var products = JSON.parse(fs.readFileSync('./inventory/products.json', 'utf8'));
 
+
+
 router.get('/', function (req, res, next) {
   console.log('Welcome to your shopping cart')
 });

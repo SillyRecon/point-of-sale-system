@@ -8,6 +8,7 @@ var datastore = require('nedb');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var index = require('./routes/index');
+var inventory = require('./routes/inventory')
 var app = express();
 
 //Middleware
@@ -20,22 +21,7 @@ app.use(session({
 }));
 
 app.use('/', index);
-
-// catch 404 and forward to error handler
-app.use(function(req, res) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  console.log('404 Page not found');
-});
-
-// error handler
-app.use(function(err, req, res) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-  console.log('Error encountered')
-
-});
+app.use('/inventory', inventory);
 
 //Set Ports
 app.set('port', (process.env.PORT || 8080));
