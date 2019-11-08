@@ -1,1 +1,50 @@
-["{\"barcode\":\"02930\",\"name\":\"Cheese\",\"bypound\":\"true\",\"nITEMS\":\"2\",\"mITEMS\":\"3\",\"xPERC\":\"5\",\"limit\":\"6\"}","{\"barcode\":\"02930\",\"name\":\"Cheese\",\"bypound\":\"true\",\"nITEMS\":\"2\",\"mITEMS\":\"3\",\"xPERC\":\"5\",\"limit\":\"6\"}"]
+[
+  {
+    "barcode": "444984",
+    "name": "Cheese",
+    "quantity": "0",
+    "price": "2.93",
+    "weight": "9.30",
+    "markdown": "0.06",
+    "nITEMS": "3.00",
+    "mITEMS": "2.00",
+    "xPERC": "0.04",
+    "limit": "7.00"
+  },
+  {
+    "barcode": "444955584",
+    "name": "Cheese",
+    "quantity": "0",
+    "price": "2.93",
+    "weight": "9.30",
+    "markdown": "0.06",
+    "nITEMS": "3.00",
+    "mITEMS": "2.00",
+    "xPERC": "0.04",
+    "limit": "7.00"
+  },
+  {
+    "barcode": "56744495558884",
+    "name": "Cheese",
+    "quantity": "0",
+    "price": "2.93",
+    "weight": "9.30",
+    "markdown": "0.06",
+    "nITEMS": "3.00",
+    "mITEMS": "2.00",
+    "xPERC": "0.04",
+    "limit": "7.00"
+  },
+  {
+    "barcode": "567458884",
+    "name": "Cheese",
+    "quantity": "0",
+    "price": "2.93",
+    "weight": "9.30",
+    "markdown": "0.06",
+    "nITEMS": "3.00",
+    "mITEMS": "2.00",
+    "xPERC": "0.04",
+    "limit": "7.00"
+  }
+]
