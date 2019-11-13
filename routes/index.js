@@ -32,7 +32,7 @@ router.get('/scan/:barcode', function(req, res, next) {
     console.log('Product does not exist')
   }
   console.log(product);
-  cart.addtoCart({product : product[0], quantity : quantity, price: 0.0});
+  cart.addtoCart({product : product[0], quantity : quantity, total: 0.0});
   req.session.cart = cart;
   console.log('You are adding an item with the barcode : ' + barcode);
   res.set('Content-Type', 'text/plain');
