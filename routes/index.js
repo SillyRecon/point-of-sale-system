@@ -15,7 +15,7 @@ router.get('/', function (req, res) {
 router.get('/yourCart', function (req, res){
   var cart = new Cart(req.session.cart ? req.session.cart : {});
   res.set('Content-Type', 'text/plain');
-  res.send(200, 'Welcome to the POS system');
+  res.send(200, cart);
 });
 
 

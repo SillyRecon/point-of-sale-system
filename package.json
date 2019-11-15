@@ -5,12 +5,33 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon app",
-    "test": "mocha",
+    "test": "nodemon --exec 'mocha -R min tests/*.js'",
     "docs": "apidoc -i ../populus-app/ -o docs/"
   },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "fs": "0.0.1-security",
+    "istanbul": "^0.4.5",
+    "mocha": "^6.2.2",
+    "morgan": "^1.9.1",
+    "nedb": "^1.8.0",
+    "path": "^0.12.7"
+  },
   "nodemonConfig": {
-    "ignore": ["inventory/*"]
+    "ignore": [
+      "inventory/*"
+    ]
   },
   "author": "Louis Hamilton",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "sinon": "^7.5.0"
+  }
 }
