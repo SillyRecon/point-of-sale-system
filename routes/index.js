@@ -13,7 +13,7 @@ router.get('/', function (req, res) {
 });
 
 router.get('/yourCart', function (req, res){
-  var cart = new Cart(req.session.cart ? req.session.cart : {});
+  var cart = new Cart(req.session.cart ? req.session.cart : {items : [],itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
   res.set('Content-Type', 'text/plain');
   res.send(200, cart);
 });
@@ -24,7 +24,7 @@ router.get('/return/:barcode', function (req, res){
   var weight = parseFloat(req.query.weight).toFixed(2);
   var quantity = parseFloat(req.query.quantity).toFixed(2);
   var barcode = req.params.barcode;
-  var cart = new Cart(req.session.cart ? req.session.cart : {});
+  var cart = new Cart(req.session.cart ? req.session.cart : {items : [],itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
   var product = products.filter(function(item) {
     return item.barcode == barcode;
   });
@@ -58,7 +58,7 @@ router.get('/scan/:barcode', function(req, res, next) {
   //console.log(weight);
   var products = JSON.parse(fs.readFileSync('./inventory/products.json', 'utf8'));
   var barcode = req.params.barcode;
-  var cart = new Cart(req.session.cart ? req.session.cart : {});
+  var cart = new Cart(req.session.cart ? req.session.cart : {items : [],itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
   var product = products.filter(function(item) {
     return item.barcode == barcode;
   });

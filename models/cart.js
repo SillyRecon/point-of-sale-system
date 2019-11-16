@@ -1,7 +1,20 @@
 module.exports = function Cart(cart) {
+    
+    if(!cart)
+      {
+        throw "You have given an null";
+      }
+    else if(typeof(cart.items) === "undefined" ||
+            typeof(cart.itemCount) === "undefined" || typeof(cart.itemPoundsCount) === "undefined" ||
+            typeof(cart.checkoutTotal) === "undefined"){
+
+            throw "You have given a cart with improper properties";
+    }
     this.items = cart.items || [];
     this.itemCount = cart.itemCount || 0;
+    this.itemPoundsCount = cart.itemPoundsCount || 0;
     this.checkoutTotal = cart.checkoutTotal || 0;
+
 
     this.addtoCart = function(cartItem) {
       console.log('CartItem : ');
@@ -9,8 +22,6 @@ module.exports = function Cart(cart) {
       console.log('CART : ');
       console.log(this.items);
 
-      //console.log(price, byweight, markdown, nITEMS, mITEMS, xPERC, limit);
-      //return;
       var item = this.items.find(o => o.product.barcode == cartItem.product.barcode);
       //If there is no item present in the cart
       console.log('FOUND CART Item : ');
@@ -248,7 +259,7 @@ module.exports = function Cart(cart) {
             console.log(this.items);
             return;
           }
-          console.log('here2');
+        console.log('here2');
         console.log({product : item.product, quantity : Math.abs(numtoRemove) * -1, weight : weight, total: 0.0});
         this.addtoCart({product : item.product, quantity : Math.abs(numtoRemove) * -1, weight : weight, total: 0.0});
         console.log(this.items);
@@ -257,27 +268,121 @@ module.exports = function Cart(cart) {
 
     };
 
+    /*Returns an array of items present in the cart, if the array this.items is
+       empty(if its length is 0) the function will
+       indicate the cart is empty through console, and return the empty array
+       , else, there are items in the array so return said array*/
     this.getCart = function() {
-      if(this.items.length == 0){
-        console.log('No items in the cart');
-        return this.items;
-      }
+
+      if(this.items.length == 0)
+        {
+          console.log('No items in the cart');
+          return this.items;
+        }
       else{
-        return this.items
+           return this.items
+          }
+    };
+    /*Returns a number representing the total cost of all the items currently in the array this.items
+      , if the array this.items is empty(if its length is 0) the function will
+      indicate the cart is empty through console, and return 0
+      , else, there are items in the array so loop through this.items and sum the totals of each item
+      in the array*/
+    this.getCheckOutTotal = function() {
+      if(this.items.length == 0)
+        {
+          console.log('No items in the cart');
+          return 0;
+        }
+      else{
+            var total = 0.0
+            for(i = 0; i < this.items.length; i++){
+               total+=this.items[i].total;
+               }
+            return total;
+          }
+    };
+
+
+    /*Updates the number of items, which are not priced by weight,
+       , if the array this.items is empty(if its length is 0) the function will
+       indicate the cart is empty through console, and return false
+       , else, there are items in the array so loop through this.items
+       , check if the current item is priced by weight, if not add it's quantity to count.
+       Check if itemCount is zero, indicating no update made otherwise return true*/
+    this.updateItemAmount = function() {
+      if(this.items.length == 0)
+        {
+         console.log('No items in the cart');
+         return false;
+        }
+      else{
+        var count = 0
+        for(i = 0; i < this.items.length; i++){
+          if(this.items.product.byweight == '0')
+            this.itemCount+=this.items[i].quantity;
+        }
+        if(this.itemCount == 0)
+          {
+            return false;
+          }
+        return true;
       }
     };
 
-    this.getCheckOutTotal = function() {
-      if(this.items.length == 0){
-        console.log('No items in the cart');
-        return this.items;
+    /*Updates the number of items, which are priced by weight,
+       , if the array this.items is empty(if its length is 0) the function will
+       indicate the cart is empty through console, and return false
+       , else, there are items in the array so loop through this.items
+       , check if the current item is priced by weight, if so add it's quantity to count.
+       Check if itemCount is zero, indicating no update made otherwise return true*/
+    this.updatePoundAmount = function() {
+      if(this.items.length == 0)
+        {
+          console.log('No items in the cart');
+          return false;
+        }
+      else{
+           for(i = 0; i < this.items.length; i++){
+              if(this.items[0].product.byweight == '1')
+                 this.itemCount+=this.items[i].quantity;
+              }
+           if(this.itemPoundsCount == 0)
+             {
+              return false;
+             }
+           return true;
+          }
+    };
+
+    /*Returns the amount in pounds of items present in the cart. If a call to
+      updatePoundAmount (this will automatically update the amount) returns false it
+      means no items measured in pounds present in this.items so return 0,
+      else there are items measured in pounds so return this.itemPoundsCount*/
+    this.getItemAmountsPOUND = function(){
+      if(this.updatePoundAmount == false){
+        return 0;
       }
       else{
-        var total = 0.0
-        for(i = 0; i < this.items.length; i++){
-          total+=this.items[i].total;
-        }
-        return total;
+        return this.itemPoundsCount;
       }
+    };
+    /*Returns the amount of items present in the cart that are not measured in pounds. If a call to
+      updateItemAmount (this will automatically update the amount) returns false it
+      means no items not measured in pounds present in this.items so return 0,
+      else there are items not measured in pounds so return this.itemCount*/
+    this.getItemAmountsNonPOUND = function(){
+      if(this.updateItemAmount == false){
+        return 0;
+      }
+      else{
+        return this.itemCount;
+      }
+    };
+    /*Returns an array of length 2 with the amount of items not measured in pounds
+      in the first index and the amount of items measured in pounds in the second index*/
+    this.getItemAmountBOTH = function(){
+
+      return [this.getItemAmountsCOUNT, this.getItemAmountsNonPOUND];
     };
 };

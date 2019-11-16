@@ -1,8 +1,10 @@
-var sinon = require('sinon');
-var cart = require('../models/cart');
+var chai = require('chai');
+var Cart = require('../models/cart');
 
 describe('Model', function () {
 
+
+  //let cart = new Cart({items : [], itemCount: 0, checkoutTotal: 0});
 
   let object = {
                 product : {
@@ -19,33 +21,46 @@ describe('Model', function () {
                 quantity : 1,
                 weight : 1,
                 total: 0.0
-              },
-        error = new Error({ error: "blah blah" }),
-        res = {}, expectedResult;
-        beforeEach(function () {
-                  res = {
-                          json: sinon.spy(),
-                          status: sinon.stub().returns({ end: sinon.spy() })
-                        };
+              };
 
-                  this.moo = "I'm a cow.";
+  beforeEach(function () {
+    cart = new Cart({items : [],itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
+    console.log(cart);
 
-        });
-        afterEach(function(done) {
-          database.dropDatabase().then(function() {}).then(done, done);
-        });
+    });
+  afterEach(function(done) {
+    cart = new Cart({items : [],itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
+    console.log(cart);
+    done();
+    });
 
-        describe('#save()', function() {
-          it('should save User data to database', function(done) {
-            // Use your database here...
-          });
-        });
+  describe('Creating the cart with a null', function() {
+    it('should get the current cart', function(done) {
+      // Use your database here...
+      chai.expect(function(){
+          cart = new Cart(null);
+       }).to.throw('You have given an null');
+       done();
 
-        describe('#load()', function() {
-          it('should load User data from database', function(done) {
-            // Use your database here...
-          });
-        });
+       });
+    it('Creating a cart missing a kay', function(done) {
+      // Use your database here...
+      chai.expect(function(){
+          cart = new Cart({itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
+       }).to.throw("You have given a cart with improper properties");
+       done();
+
+       });
+      it('should get the current cart2', function(done) {
+        // Use your database here...
+        chai.expect(function(){
+            cart = new Cart({items : [],itemCount : 0, itemPoundsCount : 0,checkoutTotal : 0.0});
+        }).cart.itemCount.to.equal(0);
+        done();
+
+       });
+
+    });
 
 
 
