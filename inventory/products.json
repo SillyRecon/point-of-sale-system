@@ -11,14 +11,14 @@
     "limit": "100.00"
   },
   {
-    "barcode": "693840",
+    "barcode": "692ee40",
     "name": "Cheese",
     "price": "1.00",
-    "byweight": "1",
+    "byweight": "0",
     "markdown": "0.00",
     "nITEMS": "5.00",
     "mITEMS": "0.00",
     "xPERC": "0.80",
-    "limit": "5.00"
+    "limit": "100.00"
   }
 ]

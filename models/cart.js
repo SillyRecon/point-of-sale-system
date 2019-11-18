@@ -1,5 +1,14 @@
+/*A model for a cart object to be used to keep track of items added to model.
+  The model needs a cart object with the following properties:
+  - An array called "items", used to hold each item added to the cart
+  - A number variable called itemCount counting the number of items not measured in pounds
+  - A number variable called itemPoundsCount counting the number of items measured in pounds
+  - A number variable called checkoutTotal counting the total at checkout*/
+
 module.exports = function Cart(cart) {
-    
+
+    /*Checks to ensure the Cart object provided is not null or if its properties
+      are invalid*/
     if(!cart)
       {
         throw "You have given an null";
@@ -10,49 +19,74 @@ module.exports = function Cart(cart) {
 
             throw "You have given a cart with improper properties";
     }
+    /*Set the instance variables*/
     this.items = cart.items || [];
     this.itemCount = cart.itemCount || 0;
     this.itemPoundsCount = cart.itemPoundsCount || 0;
     this.checkoutTotal = cart.checkoutTotal || 0;
 
-
+    /*Takes a item object and adds it to the cart provided it is not null and has the required properties */
     this.addtoCart = function(cartItem) {
-      console.log('CartItem : ');
-      console.log(cartItem);
-      console.log('CART : ');
-      console.log(this.items);
+      //Check if the item is null, if so, throw an error
+      if(!cartItem)
+        {
+          throw "You have given an null";
+        }
+      //Else if the items properties are undefined throw error
+      else if(typeof(cartItem.product) === "undefined" ||
+              typeof(cartItem.quantity) === "undefined" || typeof(cartItem.weight) === "undefined" ||
+              typeof(cartItem.total) === "undefined"){
 
+              throw "You have given a item with improper properties";
+      }
+      //Set the item total to zero if it already isnt (The add function will overwrite it)
+      else if(cartItem.total != 0.0){
+
+             cartItem.total = 0.0;
+      }
+      //Check if the item should have a weight, if it should, and it doesn't, throw an error
+      else if(cartItem.weight <= 0 && cartItem.product.byweight == '1'){
+
+              throw "Item is quantified by weight, so it must have a weight"
+      }
+      //Just set the item weight to 1.0 if it is not measured by weight
+      else if(cartItem.weight != 1 && cartItem.product.byweight == '0'){
+
+              cartItem.weight = 1.0;
+      }
       var item = this.items.find(o => o.product.barcode == cartItem.product.barcode);
       //If there is no item present in the cart
-      console.log('FOUND CART Item : ');
-      console.log(item);
       if(!item)
         {
           //If the amount of items being added exceeds the product limit
-
-          if(cartItem.product.limit < cartItem.quantity*cartItem.weight)
+          if(cartItem.product.limit < parseFloat(cartItem.quantity)*parseFloat(cartItem.weight))
             {
               console.log('This product is limited to ' + cartItem.product.limit + ' per customer.');
             }
           //else the amount of items being added does not exceed the product limit
           else{
+              //The item has no specials, so just add the item to the cart
+               if(cartItem.product.nITEMS == 0){
+                 for(i = 0; i <  parseFloat(cartItem.quantity)*parseFloat(cartItem.weight); i+=parseFloat(cartItem.weight)){
+                   cartItem.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
+                   //cartItem.total+=cartItem.product.price;
+                   }
+                 cartItem.quantity = parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
+                 this.items.push(cartItem);
+               }
                //if the product has a buy N get M at X off special
-               if(cartItem.product.nITEMS > 1 && cartItem.product.mITEMS > 0 &&
+               else if(cartItem.product.nITEMS > 1 && cartItem.product.mITEMS > 0 &&
                  cartItem.product.xPERC > 0 && cartItem.product.xPERC <= 1)
                  {
-                   console.log('HERE');
-                   //TODO
                    //Check if the quantity of the product being added is less than the qualifying
                    //N for the special to take affect
                    if(cartItem.product.nITEMS > parseFloat(cartItem.quantity)*parseFloat(cartItem.weight))
                      {
-                       for(i = 0; i <  cartItem.quantity*cartItem.weight; i+=cartItem.weight){
-                         cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
-                         //cartItem.total+=cartItem.product.price;
+                       for(i = 0; i <  parseFloat(cartItem.quantity)*parseFloat(cartItem.weight); i+=parseFloat(cartItem.weight)){
+                         cartItem.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
                          }
-                       console.log('here');
+                       cartItem.quantity = parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                        this.items.push(cartItem);
-                       console.log(this.items);
                       }
                       //the quantity of the product being added is greater than the qualifying
                       //N for the special to take affect
@@ -60,105 +94,111 @@ module.exports = function Cart(cart) {
                          //special variable that signfies the discount condition has been met
                          var discount = 0;
                          //A loop constrained by the quantity of the item being added
-                         var i = cartItem.weight;
-                         while(i <= cartItem.quantity*cartItem.weight){
-                             //
+                         var i = parseFloat(cartItem.weight);
+                         while(i <= parseFloat(cartItem.quantity)*parseFloat(cartItem.weight)){
+                             //If the required amount of items have been added that meets the N in "buy N get M at X off"
                             if(discount == cartItem.product.nITEMS)
                               {
+                                //Loop through the remaining items to be added, dicounting them by X, break the loop if i + j exceeds the amount of items being added
+                                //where i is number of items added so far and j the amount of discounted items to be added.
                                 loop:
                                 for(j=0; j < cartItem.product.mITEMS; j++){
-                                   if(i + j > cartItem.quantity)
+                                   if(i + j > parseFloat(cartItem.quantity))
                                      {
-                                       console.log('loop broken');
                                        break loop;
                                      }
-                                   console.log(parseFloat(cartItem.product.price)*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC)));
                                    cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
                                    i+=cartItem.weight;
                                   }
+                                 //Discounted items have been given, reset the discount
                                  discount = 0;
                                }
+                             //Else discount condition has not yet been met
                              else{
                                   cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
-                                  discount+=cartItem.weight;
-                                  i+=cartItem.weight;
+                                  //add to the discount condition
+                                  discount+=parseFloat(cartItem.weight);
+                                  i+=parseFloat(cartItem.weight);
                                  }
                              }
-                          console.log('here2');
+                          //update the item quantity
+                          cartItem.quantity = parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                           this.items.push(cartItem)
                           }
                        }
+                    //If the item has the buy N at X special
                     else if(cartItem.product.nITEMS > 1
                            && cartItem.product.xPERC > 0 && cartItem.product.xPERC <= 1)
                        {
-                         // TODO:
-                         if(cartItem.quantity*cartItem.weight < cartItem.product.nITEMS)
+                         //If the item does not have the qualifying N, add the items as normal
+                         if(parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) < cartItem.product.nITEMS)
                            {
-                             for(i = 0; i <  cartItem.quantity*cartItem.weight; i+=cartItem.weight){
-                                 cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
+                             for(i = 0; i < parseFloat(cartItem.quantity)*parseFloat(cartItem.weight); i+=parseFloat(cartItem.weight)){
+                                 cartItem.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
                                 }
-                             console.log('here3');
+                             cartItem.quantity = parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                              this.items.push(cartItem);
                            }
                          else{
-                              var i = 1;
-                              var discount = Math.floor((cartItem.quantity*cartItem.weight)/cartItem.product.nITEMS);
-                              console.log(discount);
-                              while(i <= cartItem.quantity*cartItem.weight){
+                              //Check how many times the discount condition has been met by dividing the item quantity by needed quantity
+                              var i = parseFloat(cartItem.weight);
+                              var discount = Math.floor((parseFloat(cartItem.quantity)*parseFloat(cartItem.weight))/cartItem.product.nITEMS);
+                              while(i <= parseFloat(cartItem.quantity)*parseFloat(cartItem.weight)){
+                                   //If no discount condition is set, add the items as normal
                                    if(discount == 0)
                                      {
-                                       cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
-                                       i+=cartItem.weight;
+                                       cartItem.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
+                                       i+=parseFloat(cartItem.weight);
                                      }
                                    else{
+                                        //Else discount items as needed before adding them
                                         if(i%cartItem.product.nITEMS != 0)
                                           {
-                                            console.log('Discount set');
-                                            cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
-                                            i+=cartItem.weight;
+                                            cartItem.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
+                                            i+=parseFloat(cartItem.weight);
                                           }
+                                        //ELse if the required amount of items has been ediscounted, reduce the discount condition by 1
                                         else if(i%cartItem.product.nITEMS == 0){
-                                                console.log('Discount recieved');
-                                                cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
+                                                cartItem.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
                                                 i+=cartItem.weight;
                                                 discount--;
                                            }
                                         }
                                     }
-                              console.log('here4');
+                              cartItem.quantity = parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                               this.items.push(cartItem);
                              }
                        }
-                       console.log(this.items);
                     }
 
       }
       else{
-           //console.log(item);
-
-           if(item.quantity + cartItem.weight*cartItem.quantity > item.product.limit)
+           //If the amount of items being added exceeds the product limit
+           if(item.quantity + parseFloat(cartItem.weight)*parseFloat(cartItem.quantity) > item.product.limit)
              {
                console.log('This product is limited to ' + cartItem.product.limit + ' per customer.');
              }
            else{
                 item.total = 0.0;
-                console.log(cartItem);
-                //item.quantity = parseFloat(item.quantity);
+                if(item.product.nITEMS == 0){
+                  for(i = 0; i < parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity; i+=parseFloat(cartItem.weight)){
+                      item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
+                    }
+                  item.quantity+=parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
+                }
 
                 //if the product has a buy N get M at X off special
-                if(item.product.nITEMS > 1 && item.product.mITEMS > 0 &&
+                else if(item.product.nITEMS > 1 && item.product.mITEMS > 0 &&
                  item.product.xPERC > 0 && item.product.xPERC <= 1)
                  {
-                  //TODO
                   //Check if the quantity of the product being added is less than the qualifying
                   //N for the special to take affect
-                  if(item.product.nITEMS >= cartItem.quantity*cartItem.weight + item.quantity)
+                  if(item.product.nITEMS >= parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity)
                     {
-                      for(i = 0; i <  cartItem.quantity*cartItem.weight + item.quantity; i+=cartItem.weight){
-                          item.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
+                      for(i = 0; i < parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity; i+=parseFloat(cartItem.weight)){
+                          item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
                         }
-                      item.quantity+=cartItem.quantity*cartItem.weight;
-                      console.log('here5');
+                      item.quantity+=parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                     }
                     //the quantity of the product being added is greater than the qualifying
                     //N for the special to take affect
@@ -166,71 +206,78 @@ module.exports = function Cart(cart) {
                         //special variable that signfies the discount condition has been met
                         var discount = 0;
                         //A loop constrained by the quantity of the item being added
-                        var i = cartItem.weight;
-                        while(i <= cartItem.quantity*cartItem.weight + item.quantity){
-                             //
+                        var i = parseFloat(cartItem.weight);
+                        while(i <= parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity){
+                             //If the required amount of items have been added that meets the N in "buy N get M at X off"
                              if(discount <= item.product.nITEMS)
                                {
+                                 //Loop through the remaining items to be added, dicounting them by X, break the loop if i + j exceeds the amount of items being added
+                                 //where i is number of items added so far and j the amount of discounted items to be added.
                                 loop:
-                                for(j = 0; j < item.product.mITEMS; j+=cartItem.weight){
-                                   if(i + j > cartItem.quantity*cartItem.weight + item.quantity)
+                                for(j = 0; j < item.product.mITEMS; j+=parseFloat(cartItem.weight)){
+                                   if(i + j > parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity)
                                      {
                                        break loop;
                                      }
-                                   cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
-                                   i+=cartItem.weight;
+                                   item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
+                                   i+=parseFloat(cartItem.weight);
                                    }
+                                 //Discounted items have been given, reset the discount
                                  discount = 0;
                                 }
+                              //Else discount condition has not yet been met
                               else{
-                                   item.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
-                                   discount+=cartItem.weight;
-                                   i+=cartItem.weight;
+                                   item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
+                                   //add to the discount condition
+                                   discount+=parseFloat(cartItem.weight);
+                                   i+=parseFloat(cartItem.weight);
                                   }
                               }
-                          item.quantity += cartItem.quantity*cartItem.weight;
                         }
-                        item.quantity+=parseFloat(cartItem.quantity*cartItem.weight);
-                        console.log('here6');
+                        //update the item quantity
+                        item.quantity+=parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
 
                   }
+                 //If the item has the buy N at X special
                  else if(item.product.nITEMS > 1
                         && item.product.xPERC > 0 && item.product.xPERC <= 1)
                         {
-                         // TODO:
-                         if(cartItem.quantity*cartItem.weight + item.quantity < cartItem.product.nITEMS)
+                         //If the item does not have the qualifying N, add the items as normal
+                         if(parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity < cartItem.product.nITEMS)
                           {
-                            for(i = 0; i <  cartItem.quantity*cartItem.weight + item.quantity; i+=cartItem.weight){
-                                item.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
+                            for(i = 0; i <  parseFloat(cartItem.quantity)*parseFloat(cartItem.weight) + item.quantity; i+=parseFloat(cartItem.weight)){
+                                item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
                                }
-                            item.quantity += cartItem.quantity*cartItem.weight;
-                            console.log('here7');
+                            item.quantity += parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                            }
                          else{
-                              var i = cartItem.weight;
-                              var discount = Math.floor((cartItem.quantity*cartItem.weight+item.quantity)/item.product.nITEMS);
-                              while(i <= cartItem.quantity*cartItem.weight+item.quantity){
+                              //Check how many times the discount condition has been met by dividing the item quantity by needed quantity
+                              var i = parseFloat(cartItem.weight);
+                              var discount = Math.floor(((parseFloat(cartItem.quantity)*parseFloat(cartItem.weight))+item.quantity)/item.product.nITEMS);
+                              while(i <= parseFloat(cartItem.quantity)*parseFloat(cartItem.weight)+item.quantity){
+                                   //If no discount condition is set, add the items as normal
                                    if(discount == 0)
                                      {
-                                       item.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown));
-                                       i+=cartItem.weight;
+                                       item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown));
+                                       i+=parseFloat(cartItem.weight);
                                      }
                                    else{
+                                        //Else discount items as needed before adding them
                                         if(i%item.product.nITEMS != 0)
                                           {
-                                           cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
-                                           i+=cartItem.weight;
+                                           item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
+                                           i+=parseFloat(cartItem.weight);
                                           }
+                                       //ELse if the required amount of items has been ediscounted, reduce the discount condition by 1
                                        else if(i%item.product.nITEMS == 0)
                                              {
-                                              cartItem.total+=parseFloat(cartItem.product.price)*cartItem.weight*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
-                                              i+=cart.weight;
+                                              item.total+=parseFloat(cartItem.product.price)*parseFloat(cartItem.weight)*(1 - parseFloat(cartItem.product.markdown))*(1 - parseFloat(cartItem.product.xPERC));
+                                              i+=parseFloat(cartItem.weight);
                                               discount--;
                                              }
                                         }
                                    }
-                              item.quantity+=cartItem.quantity*cartItem.weight;
-                              console.log('here8');
+                              item.quantity+=parseFloat(cartItem.quantity)*parseFloat(cartItem.weight);
                             }
 
                         }
@@ -238,31 +285,25 @@ module.exports = function Cart(cart) {
           }
 
     };
-
+    /*Removes items from the cart, if the amount given is greater than the qauntity of the item in question
+       remove the item from the cart entirely*/
     this.removefromCart = function(barcode, numtoRemove, weight) {
       if(numtoRemove == 0){
-        //this.items = this.items.filter(function(o) { return o.product.barcode == barcode; });
+        console.log('Specify the amount you want to remove')
       }
       else{
         var item = this.items.find(o => o.product.barcode == barcode);
-        //item.total = 0.0;
         if(!item){
           console.log('Item no longer present');
           return;
         }
-        console.log(numtoRemove*weight);
         if(item.quantity <= numtoRemove*weight)
           {
-            console.log('here');
-            console.log(barcode);
+
             this.items = this.items.filter(function(o) { return o.product.barcode != barcode; });
-            console.log(this.items);
             return;
           }
-        console.log('here2');
-        console.log({product : item.product, quantity : Math.abs(numtoRemove) * -1, weight : weight, total: 0.0});
         this.addtoCart({product : item.product, quantity : Math.abs(numtoRemove) * -1, weight : weight, total: 0.0});
-        console.log(this.items);
 
       }
 
@@ -311,15 +352,16 @@ module.exports = function Cart(cart) {
        , check if the current item is priced by weight, if not add it's quantity to count.
        Check if itemCount is zero, indicating no update made otherwise return true*/
     this.updateItemAmount = function() {
+
       if(this.items.length == 0)
         {
          console.log('No items in the cart');
          return false;
         }
       else{
-        var count = 0
+         this.itemCount = 0
         for(i = 0; i < this.items.length; i++){
-          if(this.items.product.byweight == '0')
+          if(this.items[i].product.byweight == '0')
             this.itemCount+=this.items[i].quantity;
         }
         if(this.itemCount == 0)
@@ -337,15 +379,17 @@ module.exports = function Cart(cart) {
        , check if the current item is priced by weight, if so add it's quantity to count.
        Check if itemCount is zero, indicating no update made otherwise return true*/
     this.updatePoundAmount = function() {
+
       if(this.items.length == 0)
         {
           console.log('No items in the cart');
           return false;
         }
       else{
+           this.itemPoundsCount = 0.0;
            for(i = 0; i < this.items.length; i++){
-              if(this.items[0].product.byweight == '1')
-                 this.itemCount+=this.items[i].quantity;
+              if(this.items[i].product.byweight == '1')
+                 this.itemPoundsCount+=this.items[i].quantity;
               }
            if(this.itemPoundsCount == 0)
              {
@@ -360,7 +404,7 @@ module.exports = function Cart(cart) {
       means no items measured in pounds present in this.items so return 0,
       else there are items measured in pounds so return this.itemPoundsCount*/
     this.getItemAmountsPOUND = function(){
-      if(this.updatePoundAmount == false){
+      if(this.updatePoundAmount() == false){
         return 0;
       }
       else{
@@ -372,7 +416,7 @@ module.exports = function Cart(cart) {
       means no items not measured in pounds present in this.items so return 0,
       else there are items not measured in pounds so return this.itemCount*/
     this.getItemAmountsNonPOUND = function(){
-      if(this.updateItemAmount == false){
+      if(this.updateItemAmount() == false){
         return 0;
       }
       else{
@@ -383,6 +427,6 @@ module.exports = function Cart(cart) {
       in the first index and the amount of items measured in pounds in the second index*/
     this.getItemAmountBOTH = function(){
 
-      return [this.getItemAmountsCOUNT, this.getItemAmountsNonPOUND];
+      return [this.getItemAmountsPOUND(), this.getItemAmountsNonPOUND()];
     };
 };
